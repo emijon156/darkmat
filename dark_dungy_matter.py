@@ -57,6 +57,16 @@ def load_data(path='expl.csv'):
 
 st.markdown(f"**Working with {len(df_planets)} planets with complete properties**")
 
+scaler = StandardScaler()Code has comments. Press enter to view.
+scaled_features = scaler.fit_transform(df_planets[['log_dm_density', 'r_galactic', 'pl_orbper', 'pl_bmasse']])
+df_planets[['dm_scaled', 'r_scaled', 'period_scaled', 'mass_scaled']] = scaled_features
+
+def power_analysis(corr, n, alpha=0.05):
+    effect_size = np.abs(corr)
+    ncp = effect_size*np.sqrt(n-2)/np.sqrt(1-effect_size**2)
+    t_crit = stats.t.ppf(1-alpha/2, n-2)
+    power = 1 - stats.t.cdf(t_crit, n-2, ncp) + stats.t.cdf(-t_crit, n-2, ncp)
+    return power
 
 # --- 3. STRATIFIED ANALYSIS BY PLANET TYPE ---
 st.subheader("Stratified Analysis (Spearman correlation by mass & period categories)")
