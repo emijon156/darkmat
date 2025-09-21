@@ -55,20 +55,8 @@ def load_data(path='expl.csv'):
                                           labels=['Short', 'Medium', 'Long', 'Very Long'])
     return df_clean, df_planets
 
-df_clean, df_planets = load_data()
-st.subheader("Data Preview")
-st.dataframe(df_clean.head())
-
 st.markdown(f"**Working with {len(df_planets)} planets with complete properties**")
 
-# --- 2. MULTIVARIATE ANALYSIS ---
-st.subheader("Multivariate OLS Analysis")
-scaler = StandardScaler()
-scaled_features = scaler.fit_transform(df_planets[['log_dm_density', 'r_galactic', 'pl_orbper', 'pl_bmasse']])
-df_planets[['dm_scaled', 'r_scaled', 'period_scaled', 'mass_scaled']] = scaled_features
-
-model = ols('period_scaled ~ dm_scaled + r_scaled + mass_scaled + dm_scaled:r_scaled', data=df_planets).fit()
-st.text(model.summary())
 
 # --- 3. STRATIFIED ANALYSIS BY PLANET TYPE ---
 st.subheader("Stratified Analysis (Spearman correlation by mass & period categories)")
@@ -172,25 +160,3 @@ fig3 = px.box(df_planets,
               log_y=True, points="all",
               title="Distribution of Orbital Period by Planet Mass Category")
 st.plotly_chart(fig3)
-
-# --- 9. POWER ANALYSIS & RECOMMENDATIONS ---
-st.subheader("Power Analysis & Recommendations")
-def power_analysis(corr, n, alpha=0.05):
-    effect_size = np.abs(corr)
-    ncp = effect_size*np.sqrt(n-2)/np.sqrt(1-effect_size**2)
-    t_crit = stats.t.ppf(1-alpha/2, n-2)
-    power = 1 - stats.t.cdf(t_crit, n-2, ncp) + stats.t.cdf(-t_crit, n-2, ncp)
-    return power
-
-st.write(f"Power to detect r=0.07 with n={len(df_planets)}: {power_analysis(0.07, len(df_planets)):.3f}")
-for effect_size in [0.1, 0.15, 0.2]:
-    st.write(f"Power to detect r={effect_size}: {power_analysis(effect_size,len(df_planets)):.3f}")
-
-st.markdown("""
-**Recommendations:**
-1. Weak correlations (r ≈ 0.07) suggest any DM effect is subtle  
-2. Focus on specific planet subtypes where effects might be stronger  
-3. Consider system-level properties rather than individual planets  
-4. Relationship might be non-linear – try polynomial or spline models  
-5. Spatial autocorrelation should be accounted for
-""")
