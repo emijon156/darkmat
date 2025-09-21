@@ -55,8 +55,6 @@ def load_data(path='expl.csv'):
                                           labels=['Short', 'Medium', 'Long', 'Very Long'])
     return df_clean, df_planets
 
-st.markdown(f"**Working with {len(df_planets)} planets with complete properties**")
-
 scaler = StandardScaler()
 scaled_features = scaler.fit_transform(df_planets[['log_dm_density', 'r_galactic', 'pl_orbper', 'pl_bmasse']])
 df_planets[['dm_scaled', 'r_scaled', 'period_scaled', 'mass_scaled']] = scaled_features
